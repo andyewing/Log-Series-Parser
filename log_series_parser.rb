@@ -24,8 +24,9 @@ module LogSeriesParser
 		
 		#And we open the output file
 		#!! Throw--Catch this...
-		#parseout = CSV.new("#{self.to_path}.csv")
-		parseout = CSV.open("parseout.csv",'wb')
+		
+		parseout = CSV.open("#{self.to_path}.csv",'wb')
+		#parseout = CSV.open("parseout.csv",'wb')
 	
 		#For each line in the IO stream
 		self.each_line do |line|
