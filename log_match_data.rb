@@ -12,11 +12,12 @@ to be used.
 class LogMatchData < MatchData
 	attr_accessor :set, :subsection, :replacement_string
 	
-	def initialize(set,subsection,replacement_string,*args)
+	# I don't want to mess with the initialize method, but I need to get
+	# the variables set somehow, and one line seems better than three.
+	def set_log_variables(set,subsection,replacement_string)
 		@set = set
 		@subsection = subsection
 		@replaement_string = replacement_string
-		super(*args)
 	end
 		
 

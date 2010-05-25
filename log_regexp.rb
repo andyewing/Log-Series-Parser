@@ -9,16 +9,23 @@ to be used.
 
 =end
 
+require 'match_properties.rb'
+
 class LogRegexp < Regexp
-	attr_accessor :set, :subsection, :replacement_string
+	attr_accessor :match_props
 	
-	def initialize(set,subsection,replacement_string,*args)
-		@set = set
-		@subsection = subsection
-		@replaement_string = replacement_string
+	def initialize(match_props,*args)
+		@match_props = match_props
 		super(*args)
 	end
-		
+	
+	def type
+		return @match_props.match_type
+	end
+	
+	def replacement_string
+		return @match_props.replacement_string
+	end
 
 
 end

@@ -1,106 +1,25 @@
-# entry regex
-logstart = /====================================/
+#Require LogSeriesParser
+require 'log_series_parser.rb'
 
-#section regex's
-vsmem = /"MemoryAlloPercent">\d+/
-interface = /(?<Interface Name>\S+).*Link encap:Ethernet.*/
-
-#parsing regex's
-time = /(?<time>.*GMT-06:00 2010)/
-memused = /\"MemoryUsedPercent\">(?<Memory Used>\d+)/
-procload = /\"Processing Load Percentage\">(?<Processor Load>\d+)/
-gear = /\"Current backlog Actions\">(?<Gear>\d+)/
-receive = /\s*RX packets:(?<packets>\d+) errors:(?<errors>\d+) dropped:(?<dropped>\d+) overruns:(?<overruns>\d+)/
-rxbytes = /\s*RX bytes:(?<RX bytes>\d+)/
-
-module LogSeriesParser
+#Require CSV as output format
 require 'csv'
 
-#some constants: Section divider
-SECTION_DIVIDER = "---"
+blank = MatchProperties.new
 
-#parse takes in entryregex, for identifyint the start of new log entries,
-#subregex, for any sub-sections of similar kind in each log entry
-#and parseregex, an array of all regex's of note
-def log_series_parse(entryregex, subregex1, subregex2, *parseregex)
+# entry regex
+logstart = LogRegexp.new(MatchProperties.new(MatchType::SET,""),/===================================/)
 
-#combine subregex
-subregex = [subregex1,subregex2]
+#section regex's
+vsmem = LogRegexp.new(MatchProperties.new(MatchType::SUBSECTION,"memallopercent"),/\"MemoryAlloPercent\">(?<memallopercent>\d+)/)
+interface = LogRegexp.new(MatchProperties.new(MatchType::SUBSECTION,""),/(?<Interface Name>\S+).*Link encap:Ethernet.*/)
 
-#First we initialize the array
-temparr = []
-
-#And we open the output file
-#!! Throw--Catch this...
-parseout = CSV.new("#{self.to_path}.csv")
-
-#For each line in the IO stream
-self.each_line do |line|
-
-#Match the appropriate regex
-case line
-
-# When it's the start of a new log entry
-when entryregex
-
-#Send the current temporary array contents to the CSV file
-parseout << temparr
-
-#Clear the temporary array
-temparr = []
-
-when *subregex
-
-#and add a section divider
-temparr << SECTION_DIVIDER
-
-when *parseregex
-
-#Add the results to the temporary array
-tempvalues = pull_parsed(line,*parseregex).values
-temparr << tempvalues.flatten
-
-else 
-#do nothing
-end
-end
-
-#Then we close out the new csv
-parseout.close
-
-end
-
-protected
-
-def pull_parsed(line,*parseregex)
-
-
-#Find out which match matched
-parseregex.each do |reg|
-
-if a = line.match(reg)
-
-#make a temporary hash variable
-h = {}
-
-#collect the keys and values
-a.names.each_with_index do |name, idx|
-h["name"] = a[idx]
-end
-
-#and return the hash
-return h
-end
-
-end
-
-puts "match didn't match..."
-
-end
-
-
-end
-
+#parsing regex's
+time = LogRegexp.new(blank,/(?<time>.*GMT-06:00 2010)/)
+memused = LogRegexp.new(blank,/\"MemoryUsedPercent\">(?<Memory Used>\d+)/)
+procload = LogRegexp.new(blank,/\"Processing Load Percentage\">(?<Processor Load>\d+)/)
+gear = LogRegexp.new(blank,/\"Current backlog Actions\">(?<Gear>\d+)/)
+receive = LogRegexp.new(blank,/\s*RX packets:(?<packets>\d+) errors:(?<errors>\d+) dropped:(?<dropped>\d+) overruns:(?<overruns>\d+)/)
+rxbytes = LogRegexp.new(blank,/\s*RX bytes:(?<RX bytes>\d+)/)
 
 class File
 include LogSeriesParser
