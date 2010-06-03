@@ -1,3 +1,5 @@
+filename = ARGV[0]
+
 #Require LogSeriesParser
 require 'log_series_file.rb'
 
@@ -21,6 +23,6 @@ gear = LogRegexp.new(blank,/\"Current backlog Actions\">(?<Gear>\d+)/)
 receive = LogRegexp.new(blank,/\s*RX packets:(?<packets>\d+) errors:(?<errors>\d+) dropped:(?<dropped>\d+) overruns:(?<overruns>\d+)/)
 rxbytes = LogRegexp.new(blank,/\s*RX bytes:(?<RX bytes>\d+)/)
 
-file_to_parse = LogSeriesFile.open('cid.out')
+file_to_parse = LogSeriesFile.open(filename)
 
 file_to_parse.log_series_parse(logstart,vsmem,interface,time,memused,procload,gear,receive,rxbytes)
