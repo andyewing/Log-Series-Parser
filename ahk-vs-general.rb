@@ -15,7 +15,7 @@ logstart = LogRegexp.new(MatchProperties.new(MatchType::SET,""),/isss15# show cl
 vs = LogRegexp.new(MatchProperties.new(MatchType::SUBSECTION,"vs"),/\w*Statistics for Virtual Sensor (?<vs>vs\d)/)
 
 #parsing regex's
-time = LogRegexp.new(blank,/(\.|)(?<time>\d[^G]*GMT-06:00.*)/)
+time = LogRegexp.new(blank,/^(\.|)(?<time>\d[^G]*GMT-06:00.*)/)
 ssr = LogRegexp.new(blank,/\w*Number of seconds since a reset of the statistics = (?<ssr>\d+)/)
 memused = LogRegexp.new(blank,/MemoryUsedPercent = (?<Memory Used>\d+)/)
 procload = LogRegexp.new(blank,/Processing Load Percentage = (?<Processor Load>\d+)/)

@@ -56,7 +56,7 @@ class LogSeriesFile < File
 		@data_arr = []
 		
 		#A temporary array for the headers, and a variable to track state
-		@head_arr = []
+		@header_arr = []
 		@gathering_state = 0
 		
 	
@@ -83,6 +83,9 @@ class LogSeriesFile < File
 		
 		#Send any remaining temp array to the csv
 		@outfile << @data_arr
+		
+		#Add the header row
+		@outfile << @header_arr
 		
 		#Then we close out the new csv
 		@outfile.close
@@ -116,6 +119,21 @@ class LogSeriesFile < File
 				#reset the temporary array
 				@data_arr = []							
 			end
+			
+			#Header Gathering Subsection:
+			case @gathering_state 
+			
+			when 0 # Just starting out, hit first set
+			
+				#Set State to gathering
+				@gathering_state = 1
+			
+			when 1 # Gathering headers and hit next set
+				
+				#Set state to stopped
+				@gathering_state = 2
+			
+			end
 		
 		#When it's a SUBSECTION delimiter, 
 		when MatchType::SUBSECTION
@@ -125,18 +143,38 @@ class LogSeriesFile < File
 			
 				#add a spacer and the replacement string to @data_arr
 				@data_arr.concat(["",m[lr.replacement_string.to_sym]])
+				
+				
 			else
 				
 				#add a spacer
 				@data_arr << ""
 				
 			end
-		
+
+			#Header Gathering Subsection:
+			
+			#If in gathering state
+			if @gathering_state == 1 then
+			
+				#add a spacer and the capture name
+				@header_arr.concat(["",lr.names].flatten)
+			
+			end
+			
 		#When it's just a match, 
 		when MatchType::NONE
 			
 			#Add the contents of the match to the temporary array
 			@data_arr.concat(m.captures)
+			
+			#If in gathering state
+			if @gathering_state == 1 then
+			
+				#add a spacer and the capture name
+				@header_arr.concat(lr.names)
+			
+			end
 		
 		#When the type is not set, or is none of the above
 		else
