@@ -3,9 +3,6 @@ filename = ARGV[0]
 #Require LogSeriesParser
 require 'log_series_file.rb'
 
-#Require CSV as output format
-require 'csv'
-
 blank = MatchProperties.new
 
 # entry regex
