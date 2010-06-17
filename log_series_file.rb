@@ -41,16 +41,19 @@ class LogSeriesFile < File
 	DEBUG = true
 	
 	# Instance Variables
-	attr_accessor :outfile, :data_arr, :header_arr, :gathering_state
+	attr_accessor :tempfile, :outfile, :data_arr, :header_arr, :gathering_state, :temp_filename, :out_filename
 	
 	#parse takes in entryregex, for identifyint the start of new log entries,
 	#subregex, for any sub-sections of similar kind in each log entry
 	#and parseregex, an array of all regex's of note
 	def log_series_parse(*log_regexes)
 		
-		#And we open the output file
+		#And we open the temporary and final output files
 		#!! Throw--Catch this...
-		@outfile = CSV.open("#{self.path}.csv",'wb')
+		@temp_filename = "#{self.path}-temp.csv"
+		@out_filename = "#{self.path}.csv"
+		@tempfile = CSV.open(@temp_filename,'w+b')
+		@outfile = CSV.open(@out_filename,'wb')
 		
 		#A temporary array for the data
 		@data_arr = []
@@ -81,19 +84,16 @@ class LogSeriesFile < File
 		
 		end #For each line in the IO stream
 		
-		#Send any remaining temp array to the csv
-		@outfile << @data_arr
-		
-		#Add the header row
-		@outfile << @header_arr
-		
-		#Then we close out the new csv
-		@outfile.close
+		# Create and populate the final output file
+		self.write_final
 		
 	end
 	
 	
 	protected
+	
+	#The Decision Engine decides what to do with each match.
+	# It also builds out the header array
 	
 	def decision_engine(m,lr)
 	
@@ -106,7 +106,7 @@ class LogSeriesFile < File
 			#If it has a replacement string
 			if !lr.replacement_string.empty?
 				#send the temporary array to the csv
-				@outfile << @data_arr
+				@tempfile << @data_arr
 			
 				#reset the temporary array to the replacement str
 				@data_arr = [m[lr.replacement_string.to_sym]]
@@ -114,7 +114,7 @@ class LogSeriesFile < File
 			else
 				
 				#send the temporary array to the csv
-				@outfile << @data_arr
+				@tempfile << @data_arr
 			
 				#reset the temporary array
 				@data_arr = []							
@@ -181,6 +181,30 @@ class LogSeriesFile < File
 			puts "LogRegexp has an invalid type"
 		end
 	
+	end
+	
+	def write_final
+		#Send any remaining temp array to the csv
+		@tempfile << @data_arr
+		
+		#Write the final output file:
+		@outfile << @header_arr
+		
+		@tempfile.rewind
+		@tempfile.gets
+		
+		@tempfile.each do |line|
+			@outfile << line
+		end
+			
+		
+		#Then we close out the temporary and final csv
+		@tempfile.close
+		@outfile.close\
+		
+		#Finally, we delete the temporary file
+		File.delete(@temp_filename)
+		
 	end
 	
 	def debugout(thing)

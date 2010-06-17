@@ -10,10 +10,10 @@ logstart = LogRegexp.new(MatchProperties.new(MatchType::SET,""),/===============
 
 #section regex's
 vsmem = LogRegexp.new(MatchProperties.new(MatchType::SUBSECTION,"memallopercent"),/\"MemoryAlloPercent\">(?<memallopercent>\d+)/)
-interface = LogRegexp.new(MatchProperties.new(MatchType::SUBSECTION,""),/(?<Interface Name>\S+).*Link encap:Ethernet.*/)
+interface = LogRegexp.new(MatchProperties.new(MatchType::SUBSECTION,"Interface Name"),/(?<Interface Name>\S+).*Link encap:Ethernet.*/)
 
 #parsing regex's
-time = LogRegexp.new(blank,/(?<time>.*GMT-06:00 2010)/)
+time = LogRegexp.new(blank,/(?<time>.* 2010)/)
 memused = LogRegexp.new(blank,/\"MemoryUsedPercent\">(?<Memory Used>\d+)/)
 procload = LogRegexp.new(blank,/\"Processing Load Percentage\">(?<Processor Load>\d+)/)
 gear = LogRegexp.new(blank,/\"Current backlog Actions\">(?<Gear>\d+)/)
